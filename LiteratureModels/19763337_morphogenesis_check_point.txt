@@ -1,0 +1,12 @@
+BUD=1 :	NOT MASS=0 
+SBF=1 :	NOT MASS=0 AND Clb2=0 
+Swe1=1 :	NOT SBF=0 AND ((NOT Clb2=0 AND Hsl1=0) OR (NOT Hsl1=0 AND Clb2=0)) 
+Swe1=2 :	NOT SBF=0 AND NOT (NOT Hsl1=0 OR NOT Clb2=0) 
+Mih1=1 :	(NOT Mpk1=0 AND NOT Clb2=0) OR (Mpk1=0 AND Clb2=0) 
+Mih1=2 :	Mpk1=0 AND NOT Clb2=0 
+Clb2=1 :	(MASS=1 AND ((Swe1=1 AND NOT Mih1=2) OR (Swe1=2 AND Mih1=1))) OR (NOT MASS=0 AND Swe1=2 AND Mih1=0) 
+Clb2=2 :	(MASS=1 AND (Swe1=0 OR Mih1=2)) OR (MASS=2 AND (NOT Swe1=2 OR NOT Mih1=0)) 
+MASS=1 :	MASS=1 
+MASS=2 :	MASS=2 
+Mpk1=1 :	BUD=0 
+Hsl1=1 :	NOT BUD=0 

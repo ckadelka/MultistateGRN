@@ -1,0 +1,4 @@
+TrpE=1 :	TrpR=0 AND Trp=0
+TrpR=1 :	Trp=2
+Trp=1 :	(Trpext=0 AND TrpE=1) OR (Trpext=1 AND TrpE=0) OR (Trpext=1 AND TrpE=1)
+Trp=2 :	(Trpext=2 AND TrpE=0) OR (Trpext=2 AND TrpE=1)

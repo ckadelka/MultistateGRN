@@ -1,0 +1,41 @@
+Bap=1 :	((((Bin=1 OR (Mad=1 AND Med=1)) AND Tin=1 AND NOT Slp=1 AND NOT (Bin=1 AND Mad=1 AND Med=1 AND Tin=1 AND En=1) AND NOT (Ci=1 AND Tin=1 AND En=1) AND NOT (Ci=1 AND Mad=1 AND Med=1 AND Tin=1 AND Bin=1) AND NOT Bin=2) OR (Slp=1 AND Mad=1 AND Med=1 AND Ci=1 AND En=1 AND Tin=1 AND NOT Bin=2)) OR (Ci=1 AND Tin=1 AND En=1 AND Slp=1 AND NOT (Mad=1 AND Med=1) AND NOT Bin=2)) OR (Ci=1 AND Tin=1 AND NOT En=1 AND Slp=1 AND Mad=1 AND Med=1 AND NOT Bin=2)
+Bap=2 :	(Bin=1 AND Mad=1 AND Med=1 AND NOT (Ci=1 AND En=1) AND NOT Slp=1 AND Tin=1 AND (Ci=1 OR En=1)) OR (Ci=1 AND Tin=1 AND En=1 AND NOT Slp=1 AND NOT (Mad=1 AND Med=1) AND NOT Bin=2)
+Bap=3 :	Bin=2 OR (Ci=1 AND En=1 AND NOT Slp=1 AND Mad=1 AND Med=1 AND Tin=1) 
+Bin=1 :	Bap=1 
+Brk=1 :	NOT (Shn=1 AND Mad=1 AND Med=1) 
+Ci=1 :	NOT Pka=1 
+Da=1 :	NOT Emc=1 
+Der=1 :	Spi=1 
+Doc=1 :	Mad=1 AND Med=1 AND Pan=1 
+Dome=1 :	Upd=1 
+Dsix4=1 :	(Tin=1 OR Zfh-1=1) AND NOT (Mad=1 AND Med=1) 
+E_Spl=1 :	Nicd=1 AND Stat92E=1 AND SuH=1 
+Emc=1 :	Nicd=1 
+Eve=1 :	Pnt=1 AND Htl=1 AND Mad=1 AND Pan=1 AND Med=1 AND Tin=2 AND Twi=1 
+Eya=1 :	Twi=1 OR Tin=2 
+Hbr=1 :	Pan=1 AND Htl=1 
+Hop=1 :	Dome=1 
+Htl=1 :	(((Pyr=1 AND Pan=1) OR Ths=1) AND Pan=1) OR (Pyr=1 AND Ths=1) 
+Mad=1 :	Tkv=1 
+Mef2=1 :	Tin=1 OR Twi=2 
+Nicd=1 :	Notch=1 
+Notch=1 :	Delta=1 
+Pan=1 :	Wg=1 
+Pka=1 :	NOT Smo=1 
+Pnr=1 :	Doc=1 AND Tin=1 
+Pnt=1 :	Rl=1 
+Poxm=1 :	Pan=1 AND Twi=1 AND NOT (Mad=1 AND Med=1) 
+Ptc=1 :	NOT Hh=1 
+Ras=1 :	Der=1 
+Rl=1 :	Ras=1 
+Slp=1 :	Pan=1 
+Smo=1 :	NOT Ptc=1 
+Srp=1 :	Ci=1 AND NOT En=1 AND NOT (Mad=1 AND Med=1) 
+Srp=2 :	Ci=1 AND En=1 AND NOT (Mad=1 AND Med=1) 
+Stat92E=1 :	Hop=1 OR Tin=2 
+Tin=1 :	Mad=1 AND (Med=1 OR Twi=1 OR Tin=1) AND NOT (Mad=1 AND Med=1 AND Pan=1 AND Stat92E=1) 
+Tin=2 :	Mad=1 AND Med=1 AND Pan=1 AND Stat92E=1 
+Tkv=1 :	Dpp=1 
+Twi=1 :	((Slp=1 OR Da=1) AND Twi=1 AND NOT (Da=1 AND Slp=1) AND NOT E_Spl=1) OR (Slp=1 AND Twi=1 AND NOT (Da=1 AND NOT E_Spl=1))
+Twi=2 :	Slp=1 AND Da=1 AND Twi=1 AND NOT E_Spl=1 
+Zfh-1=1 :	Twi=1 

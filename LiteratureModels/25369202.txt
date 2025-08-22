@@ -1,0 +1,29 @@
+CckA=1 :	DivL=0
+CckA=2 :	DivL=1
+CcrM=0 :	(CtrAa=0 AND CcrM=0 AND SciP=0) OR (CtrAa=0 AND CcrM=0 AND SciP=1) OR (CtrAa=0 AND CcrM=1 AND SciP=0) OR (CtrAa=0 AND CcrM=1 AND SciP=1) OR (CtrAa=1 AND CcrM=0 AND SciP=1) OR (CtrAa=1 AND CcrM=1 AND SciP=0) OR (CtrAa=1 AND CcrM=1 AND SciP=1)
+CcrM=1 :	CtrAa=1 AND CcrM=0 AND SciP=0
+ChpT=1 :	CckA=1
+ChpT=2 :	CckA=2
+ClpXP-RcdA=0 :	CpdR=2
+ClpXP-RcdA=1 :	CpdR=1
+CpdR=1 :	ChpT=1
+CpdR=2 :	ChpT=2
+CtrAa=0 :	(CtrAa=0 AND GcrA=0 AND CcrM=0 AND SciP=1) OR (CtrAa=0 AND GcrA=0 AND CcrM=1 AND SciP=0) OR (CtrAa=0 AND GcrA=0 AND CcrM=1 AND SciP=1) OR (CtrAa=0 AND GcrA=1 AND CcrM=0 AND SciP=1) OR (CtrAa=0 AND GcrA=1 AND CcrM=1 AND SciP=0) OR (CtrAa=0 AND GcrA=1 AND CcrM=1 AND SciP=1) OR (CtrAa=1 AND GcrA=0 AND CcrM=0 AND SciP=1) OR (CtrAa=1 AND GcrA=0 AND CcrM=1 AND SciP=0) OR (CtrAa=1 AND GcrA=0 AND CcrM=1 AND SciP=1) OR (CtrAa=1 AND GcrA=1 AND CcrM=0 AND SciP=1) OR (CtrAa=1 AND GcrA=1 AND CcrM=1 AND SciP=0) OR (CtrAa=1 AND GcrA=1 AND CcrM=1 AND SciP=1)
+CtrAa=1 :	(CtrAa=0 AND GcrA=0 AND CcrM=0 AND SciP=0) OR (CtrAa=0 AND GcrA=1 AND CcrM=0 AND SciP=0) OR (CtrAa=1 AND GcrA=0 AND CcrM=0 AND SciP=0) OR (CtrAa=1 AND GcrA=1 AND CcrM=0 AND SciP=0)
+CtrAb=0 :	(ChpT=1 AND ClpXP-RcdA=1) OR (ChpT=2 AND ClpXP-RcdA=1)
+CtrAb=1 :	ChpT=1 AND ClpXP-RcdA=0
+CtrAb=2 :	ChpT=2 AND ClpXP-RcdA=0
+DivJ=1 :	(DivK=1 AND PleC=1) OR (DivK=1 AND PleC=2) OR (DivK=2 AND PleC=2)
+DivJ=2 :	DivK=2 AND PleC=1
+DivK=1 :	(PleC=1 AND DivJ=1) OR (PleC=2 AND DivJ=1) OR (PleC=2 AND DivJ=2)
+DivK=2 :	PleC=1 AND DivJ=2
+DivL=0 :	DivK=2
+DivL=1 :	DivK=1
+DnaA=0 :	(CtrAa=0 AND GcrA=0 AND DnaA=0 AND CcrM=0) OR (CtrAa=0 AND GcrA=0 AND DnaA=0 AND CcrM=1) OR (CtrAa=0 AND GcrA=0 AND DnaA=1 AND CcrM=0) OR (CtrAa=0 AND GcrA=0 AND DnaA=1 AND CcrM=1) OR (CtrAa=0 AND GcrA=1 AND DnaA=0 AND CcrM=0) OR (CtrAa=0 AND GcrA=1 AND DnaA=0 AND CcrM=1) OR (CtrAa=0 AND GcrA=1 AND DnaA=1 AND CcrM=0) OR (CtrAa=0 AND GcrA=1 AND DnaA=1 AND CcrM=1) OR (CtrAa=1 AND GcrA=0 AND DnaA=0 AND CcrM=0) OR (CtrAa=1 AND GcrA=0 AND DnaA=1 AND CcrM=0) OR (CtrAa=1 AND GcrA=0 AND DnaA=1 AND CcrM=1) OR (CtrAa=1 AND GcrA=1 AND DnaA=0 AND CcrM=0) OR (CtrAa=1 AND GcrA=1 AND DnaA=0 AND CcrM=1) OR (CtrAa=1 AND GcrA=1 AND DnaA=1 AND CcrM=0) OR (CtrAa=1 AND GcrA=1 AND DnaA=1 AND CcrM=1)
+DnaA=1 :	CtrAa=1 AND GcrA=0 AND DnaA=0 AND CcrM=1
+GcrA=0 :	(CtrAa=0 AND DnaA=0) OR (CtrAa=1 AND DnaA=0) OR (CtrAa=1 AND DnaA=1)
+GcrA=1 :	CtrAa=0 AND DnaA=1
+PleC=1 :	DivK=2
+PleC=2 :	DivK=1
+SciP=0 :	(DnaA=0 AND CtrAa=0) OR (DnaA=1 AND CtrAa=0) OR (DnaA=1 AND CtrAa=1)
+SciP=1 :	DnaA=0 AND CtrAa=1

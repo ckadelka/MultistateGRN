@@ -1,0 +1,87 @@
+A20=1 :	NF-κB=1 
+AdCy=1 :	GR=1 
+Apaf-1=1 :	cyt-c=1 AND smac=1 
+BAD-14-3-3=1 :	BAD=1 AND P14-3-3=1 
+BAD=1 :	PKB=1 
+BIR1-2=1 :	C3*-XIAP=1 
+Bax=1 :	((BAD-14-3-3=0 AND Bcl-xl=0 ) OR (tBid=1 )) OR (UV=1 )
+Bcl-xl=1 :	((UV=0 ) OR (C3*p17=0 )) OR (NF-κB=1 )
+Bid=1 :	housekeeping=1 AND P=0 
+C3*-XIAP=1 :	C3*p17=1 
+C3*-c-IAP=1 :	C3*p17=1 AND c-IAP=1 
+C3*p17=1 :	((((C3*p20=1 ) OR (C8*=1 AND XIAP=0 )) OR (BIR1-2=0 )) OR (BIR1-2=0 )) OR (C3*p20=1 )
+C3*p17=2 :	(((C3*p20=2 AND NOT XIAP=2 ) OR (smac-XIAP=1 AND C8*=1 )) OR (C3*p20=2 AND NOT XIAP=2 )) OR (smac-XIAP=1 AND C8*=1 )
+C3*p20=1 :	(C8*=1 ) OR (C8*=1 )
+C3*p20=2 :	((C8*=2 ) OR (C9*=1 )) OR (C8*=2 )
+C6=1 :	(C3*p17=1 ) OR (C3*p17=1 )
+C8*-DISC*=1 :	(DISC*=1 AND proC8=1 ) OR (DISC*=1 AND proC8=1 )
+C8*-DISC*=2 :	(DISC*=2 AND proC8=1 ) OR (DISC*=2 AND proC8=1 )
+C8*-FLIP=1 :	C8*-DISC*=1 AND FLIP=1 
+C8*-comp2=1 :	proC8=1 AND comp2=1 
+C8*=1 :	((((((C8*-comp2=1 ) OR (C8*-DISC*=1 )) OR (C8*-DISC*=1 AND FLIP=0 )) OR (T2R=1 AND C8=1 )) OR (C6=1 )) OR (C6=1 )) OR (C8*-DISC*=1 )
+C8*=2 :	(C8*-DISC*=2 ) OR (C8*-DISC*=2 )
+C9*=1 :	(((apopto=1 ) OR (C3*p17=2 )) OR (C3*p17=2 )) OR (C3*p17=2 )
+CAD=1 :	PARP=0 AND ICAD=0 
+DISC*=1 :	(Fas=1 AND FADD=1 ) OR (FAS=1 AND FADD=1 )
+DISC*=2 :	(FAS=2 AND FADD=1 ) OR (FAS=2 AND FADD=1 )
+ERK1/2=1 :	Ras=1 
+FADD=1 :	housekeeping=1 
+FAS=1 :	FASL=1 
+FAS=2 :	FASL=2 
+FLIP=1 :	housekeeping=1 
+FLIP=2 :	NF-κB=1 
+Fas,=1 :	FasL=1 
+GR=1 :	Glucagon=1 
+GSK-3=1 :	PKB=0 
+Grb2-SOS=1 :	Shc=1 
+I-kBa=1 :	((NOT UV=2 ) OR (NF-κB=1 )) OR (NF-κB=1 )
+I-kBb=1 :	((NOT UV=2 ) OR (NF-κB=1 )) OR (NF-κB=1 )
+I-kBe=1 :	((NOT UV=2 ) OR (NF-κB=1 )) OR (NF-κB=1 )
+ICAD=1 :	housekeeping=1 AND NOT C3*p17=2 
+IKK*=1 :	(((IL-1=1 AND IKKdeact=1 ) OR (NIK=1 AND IKKdeact=1 )) OR (PI3K=1 AND IKKdeact=1 )) OR (Raf=1 AND IKKdeact=1 )
+IKKdeact=1 :	housekeeping=1 
+IR=1 :	Insulin=1 AND IRS-P2=0 
+IRS-P2=1 :	TNF=1 AND IRS=1 
+IRS-P=1 :	((((IR=1 AND IRS=1 ) OR (PKC=0 )) OR (PKB=1 )) OR (PKC=0 )) OR (PKB=1 )
+IRS=1 :	housekeeping=1 
+JNK=1 :	((TNF=1 ) OR (NF-κB=0 )) OR (NF-κB=0 )
+MEK=1 :	Pak1=1 
+NF-κB=1 :	I-kBa=0 AND I-kBe=0 
+NIK=1 :	comp1=1 
+P14-3-3=1 :	housekeeping=1 
+P=1 :	T2R=1 
+PARP=1 :	housekeeping=1 AND NOT C3*p17=2 
+PDK1=1 :	PIP3=1 
+PI3K=1 :	IRS-P=1 
+PIP3=1 :	PI3K=1 
+PKA=1 :	cAMP=1 
+PKB=1 :	PDK1=1 
+PKC=1 :	PDK1=1 
+Pak1=1 :	Rac=1 
+RIP-deubi=1 :	smac=1 
+RIP=1 :	housekeeping=1 
+Rac=1 :	PI3K=1 
+Raf=1 :	(((Pak1=1 ) OR (PKC=1 )) OR (PKA=0 )) OR (PKA=0 )
+Ras=1 :	Grb2-SOS=1 
+Shc=1 :	IRS-P=1 
+T2R=1 :	T2RL=1 
+TNFR-1=1 :	TNF=1 
+TRADD=1 :	housekeeping=1 
+TRAF-2=1 :	(housekeeping=1 ) OR (NF-κB=1 )
+XIAP=1 :	housekeeping=1 
+XIAP=2 :	NF-κB=1 
+apopto=1 :	Apaf-1=1 
+apoptosis=1 :	CAD=1 AND PARP=0 AND gelsolin=0 
+c-IAP=1 :	((smac=0 ) OR (housekeeping=1 )) OR (smac=0 )
+c-IAP=2 :	NF-κB=1 
+cAMP=1 :	AdCy=1 
+comp1-IKK*=1 :	((comp1=1 AND IKKdeact=1 ) OR (A20=0 )) OR (A20=0 )
+comp1=1 :	TNFR-1=1 AND RIP=1 AND TRADD=1 AND TRAF-2=1 AND c-IAP=1 
+comp2=1 :	RIP-deubi=1 AND comp1=1 AND FADD=1 
+cyt-c=1 :	Bax=1 
+gelsolin=1 :	housekeeping=1 AND C3*p17=0 
+p38=1 :	Ras=1 
+proC8=1 :	housekeeping=1 
+smac-XIAP=1 :	smac=1 
+smac=1 :	(smac-mimetics=1 ) OR (Bax=1 )
+tBid=1 :	C8*=1 AND P=1 

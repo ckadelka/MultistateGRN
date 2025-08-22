@@ -1,0 +1,25 @@
+Dmrt=1 :	((((Gata4=1) OR (Gata4=1 AND Sf1=1)) OR (Gata4=1 AND Sox9=2)) OR (Gata4=1 AND Sox9=2 AND Sf1=1)) OR (Sox9=2 AND Sf1=1)
+Fgf9=1 :	(Fgf9=1) OR (Sox9=2)
+Fgf9=2 :	Fgf9=1 AND Sox9=2
+Fgf9_c=1 :	(Sox9_c=2) OR (Fgf9r_c=1)
+Fgf9_c=2 :	Sox9_c=2 AND Fgf9r_c=1
+Fgf9_p=1 :	(Sox9_p=2) OR (Fgf9r_p=1)
+Fgf9_p=2 :	Sox9_p=2 AND Fgf9r_p=1
+Fgf9r_c=1 :	Fgf9_c=1
+Fgf9r_c=2 :	Fgf9_c=1 AND Fgf9_p=2
+Fgf9r_p=1 :	Fgf9_p=1
+Fgf9r_p=2 :	Fgf9_p=1 AND Fgf9_c=2
+Foxl2=1 :	AF=1
+Sf1=1 :	Wt1=1
+Sf1=2 :	Wt1=1 AND Sox9=2
+Sox9=1 :	((Sf1=1) OR (Sf1=1 AND b-cat=1)) OR (Sf1=1 AND b-cat=1 AND Sox9=1)
+Sox9=2 :	((((Sf1=1 AND Sry=1) OR (Sf1=1 AND b-cat=1 AND Sry=1)) OR (Sf1=1 AND Sry=1 AND Sox9=1)) OR (Sf1=1 AND b-cat=1 AND Sry=1 AND Sox9=1)) OR (Sf1=1 AND Sox9=1)
+Sry=1 :	Y=1 AND Wt1=1 AND AS=1 AND Sf1=1 AND Gata4=1
+Wnt4=1 :	Wnt4=1 AND Fgf9=1
+Wnt4=2 :	Wnt4=1
+Wnt4_c=1 :	Wnt4_c=1 AND Fgf9r_c=1
+Wnt4_c=2 :	Wnt4_c=1
+Wnt4_p=1 :	Wnt4_p=1 AND Fgf9r_p=1
+Wnt4_p=2 :	Wnt4_p=1
+b-cat=1 :	Wnt4=1
+b-cat=2 :	Wnt4=2

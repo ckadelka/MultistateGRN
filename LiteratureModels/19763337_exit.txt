@@ -1,0 +1,12 @@
+Clb2=1 :	Cdh1=0 AND NOT Cdc20=0 
+Clb2=2 :	Cdc20=0 AND Cdh1=0 
+Cdc20=1 :	Cdh1=0 
+SecurinPds1=1 :	Cdc20=0 
+PP2ACdc55=1 :	NOT (SeparaseEsp1=0 OR (SeparaseEsp1=1 AND NOT SecurinPds1=0)) 
+PP2ACdc55=2 :	SeparaseEsp1=0 OR (SeparaseEsp1=1 AND NOT SecurinPds1=0) 
+Cdc5Polo=1 :	NOT Clb2=0 AND Cdh1=0 
+Bub2Bfa1=1 :	NOT PP2ACdc55=0 OR Cdc5Polo=0 
+Cdc15=1 :	Clb2=0 OR (NOT Cdc14=0 AND Net1=0) 
+Net1=1 :	((NOT Cdc14=0 AND NOT Net1=0 AND Clb2=0 AND PP2ACdc55=0) OR (PP2ACdc55=1 AND ((Cdc14=0 AND Clb2=1) OR (NOT Cdc14=0 AND Clb2=1)))) AND NOT (NOT Cdc15=0 AND NOT Tem1=0 AND Bub2Bfa1=0) 
+Net1=2 :	((((NOT Cdc14=0 AND Net1=0) OR NOT PP2ACdc55=0) AND Clb2=0) OR PP2ACdc55=2) AND NOT (NOT Cdc15=0 AND NOT Tem1=0 AND Bub2Bfa1=0) 
+Cdh1=1 :	(NOT Clb2=2 AND NOT Cdc14=0 AND Net1=0) OR (NOT Cdh1=0 AND Clb2=0) 
