@@ -4,6 +4,7 @@
 import warnings
 from collections.abc import Sequence
 import numpy as np
+import math
 from boolforge import WiringDiagram
 
 import utils
@@ -213,141 +214,188 @@ class MultistateNetwork(WiringDiagram):
     
 #         return cls(F=F, I=I, variables=variables, simplify_functions=simplify_functions)
 
-
-#     @classmethod
-#     def from_string(
-#         cls,
-#         network_string: str,
-#         separator: str | Sequence[str] = ",",
-#         max_degree: int = 24,
-#         allow_truncation: bool = False,
-#         simplify_functions: bool = False,
-#         ) -> "BooleanNetwork":
-#         """
-#         Construct a BooleanNetwork from a textual Boolean rule specification.
+    @classmethod
+    def from_string(
+        cls,
+        network_string: str,
+        separator : str = ":",
+        original_equality : str = "=",
+        original_not : str = "NOT",
+        original_and : str = "AND",
+        original_or : str = "OR",
+        max_degree: int = 24,
+        ) -> "MultistateNetwork":
+        # """
+        # Construct a BooleanNetwork from a textual Boolean rule specification.
     
-#         This compatibility method parses a string representation of Boolean update
-#         rules (one rule per line) and constructs a corresponding BooleanNetwork. 
-#         The input format is intended for legacy or trusted sources and supports 
-#         logical expressions using AND/OR/NOT operators. See utils.f_from_expression
-#         for details.
+        # This compatibility method parses a string representation of Boolean update
+        # rules (one rule per line) and constructs a corresponding BooleanNetwork. 
+        # The input format is intended for legacy or trusted sources and supports 
+        # logical expressions using AND/OR/NOT operators. See utils.f_from_expression
+        # for details.
     
-#         .. warning::
-#             This method uses ``eval`` internally and MUST NOT be used on untrusted
-#             input.
+        # .. warning::
+        #     This method uses ``eval`` internally and MUST NOT be used on untrusted
+        #     input.
     
-#         Parameters
-#         ----------
-#         network_string : str
-#             String encoding Boolean update rules, one per line.
-#         separator : str or sequence of str, optional
-#             Separator(s) between variable names and Boolean expressions.
-#         max_degree : int, optional
-#             Maximum allowed indegree for explicit truth-table construction.
-#         allow_truncation : bool, optional
-#             If False (default), nodes with indegree greater than ``max_degree``
-#             raise a ValueError. If True, such nodes are replaced by identity
-#             self-loops, allowing fast construction of large networks while
-#             ignoring high-degree functions.
-#         simplify_functions : bool, optional
-#             If True, Boolean update functions are simplified after initialization.
-#             Default is False.  
+        # Parameters
+        # ----------
+        # network_string : str
+        #     String encoding Boolean update rules, one per line.
+        # separator : str or sequence of str, optional
+        #     Separator(s) between variable names and Boolean expressions.
+        # max_degree : int, optional
+        #     Maximum allowed indegree for explicit truth-table construction.
+        # allow_truncation : bool, optional
+        #     If False (default), nodes with indegree greater than ``max_degree``
+        #     raise a ValueError. If True, such nodes are replaced by identity
+        #     self-loops, allowing fast construction of large networks while
+        #     ignoring high-degree functions.
             
-#         Returns
-#         -------
-#         BooleanNetwork
-#             The constructed Boolean network.
+        # Returns
+        # -------
+        # BooleanNetwork
+        #     The constructed Boolean network.
     
-#         Raises
-#         ------
-#         ValueError
-#             If parsing fails or if ``allow_truncation`` is False and 
-#             a node exceeds ``max_degree``.
-#         """
+        # Raises
+        # ------
+        # ValueError
+        #     If parsing fails or if ``allow_truncation`` is False and 
+        #     a node exceeds ``max_degree``.
+        # """
         
-#         # --------------------------------------------
-#         # 1. Clean lines
-#         # --------------------------------------------
-#         lines = [
-#             l.strip()
-#             for l in network_string.splitlines()
-#             if l.strip() and not l.strip().startswith("#")
-#         ]
-    
-#         rules = []
-#         for i, line in enumerate(lines):
-#             if separator not in line:
-#                 raise ValueError(f"Missing separator '{separator}' in line {i+1}:\n{line}")
-#             lhs, rhs = line.split(separator, 1)
-#             rules.append((lhs.strip(), rhs.strip()))
-    
-#         # --------------------------------------------
-#         # 2. Collect explicitly defined nodes
-#         # --------------------------------------------
-#         node_names = [lhs for lhs, _ in rules]
-    
-#         # --------------------------------------------
-#         # 3. Parse RHS to detect all regulators
-#         # --------------------------------------------
-#         parsed_rhs = []
-#         all_regulators = set()
-    
-#         for lhs, rhs in rules:
-#             f, regulators = utils.f_from_expression(rhs, max_degree=max_degree)
-#             parsed_rhs.append((lhs, rhs, f, regulators))
-#             for r in regulators:
-#                 all_regulators.add(r)
-    
-#         # --------------------------------------------
-#         # 4. Add missing regulators as identity nodes
-#         # --------------------------------------------
-#         missing_nodes = sorted(all_regulators - set(node_names))
-    
-#         # Append them deterministically (sorted for reproducibility)
-#         node_names_extended = node_names + missing_nodes
-    
-#         node_index = {name: i for i, name in enumerate(node_names_extended)}
-    
-#         # --------------------------------------------
-#         # 5. Build F and I
-#         # --------------------------------------------
-#         F = []
-#         I = []
-    
-#         # First build defined rules
-#         for lhs, rhs, f, regulators in parsed_rhs:
-    
-#             deg = len(regulators)
-    
-#             if deg > max_degree:
-#                 if not allow_truncation:
-#                     raise ValueError(
-#                         f"Node '{lhs}' has indegree {deg} > max_degree={max_degree}."
-#                     )
-#                 idx = node_index[lhs]
-#                 F.append(np.array([0, 1], dtype=int))
-#                 I.append(np.array([idx], dtype=int))
-#                 continue
-    
-#             reg_indices = [node_index[r] for r in regulators]
-    
-#             F.append(f.astype(int))
-#             I.append(np.array(reg_indices, dtype=int))
-    
-#         # Add identity nodes for missing regulators
-#         for name in missing_nodes:
-#             idx = node_index[name]
-#             F.append(np.array([0, 1], dtype=int))  # identity
-#             I.append(np.array([idx], dtype=int))
-    
-#         return cls(
-#             F,
-#             I,
-#             node_names_extended,
-#             simplify_functions=simplify_functions,
-#         )
-
-
+        tvec = network_string
+        
+        # the first line is inherently unique
+        node_count = 1
+        
+        # get the count of unique nodes -> non-boolean nodes exist across multiple adjacent lines
+        for i, line in enumerate(tvec):
+            if i > 0 and not line.split(original_equality)[0] == tvec[i - 1].split(original_equality)[0]:
+                node_count += 1
+        
+        # Determining Variables
+        variables = []
+        for line in tvec:
+            line_var = line[0:line.find(original_equality)].replace(' ', '')
+            if not line_var in variables:
+                variables.append(line_var)
+        
+        # Determining Constants
+        constants_and_variables = []
+        for line in tvec:
+            linesplit = line.split(' ')
+            for el in linesplit:
+                el = el.split(original_equality)[0]
+                if el not in ['(', ')', '+', '*', separator, original_not, original_and, original_or, '', ' ']:
+                    constants_and_variables.append(el)
+        constants = list(set(constants_and_variables)-set(variables))
+        
+        dict_vars_and_consts = dict({original_equality : '==', original_not : '~', original_and : '&', original_or : '|'})
+        dict_vars_and_consts.update(dict(list(zip(variables, ["x[%i]" % i for i in range(len(variables))]))))
+        # append constants to the end
+        dict_vars_and_consts.update(list(zip(constants, ["x[%i]" % i for i in range(len(variables), len(set(constants_and_variables)))])))
+        
+        # switch tvec to use the new representation instead of the original ones
+        for i, line in enumerate(tvec):
+            linesplit = line.split(' ')
+            for j, el in enumerate(linesplit):
+                if el not in ['(', ')', '+', '*', separator, '==', '&', '|', '~', '', ' ']:
+                    if original_equality in el:
+                        equality_split = el.split(original_equality)
+                        linesplit[j] = dict_vars_and_consts[equality_split[0]] + '==' + equality_split[1]
+                    else:
+                        linesplit[j] = dict_vars_and_consts[el]
+            tvec[i] = ' '.join(linesplit)
+        
+        # get the right side of the state equality, the half the describes the rules
+        tvec_rule = []
+        for i in range(len(tvec)):
+            tvec_rule.append(tvec[i][tvec[i].find(separator)+len(separator):])
+        
+        B = []
+        # get the bases for every variable
+        
+        # We have to check every instance of the variable in the file, as there is potential
+        # (albeit rarely does it occur) that there exists some gene that has more states
+        # than regulatory rules (ex. a quaternary node that has rules for 1 and 2, but not for 3)
+        # If only check the left-side, it becomes much faster, but it will inaccurately read
+        # some nodes that have the aforementioned affliction
+        for i, v in enumerate(variables):
+            node_rep = dict_vars_and_consts[v]
+            highest_state = 0
+            for line in tvec:
+                if node_rep in line:
+                    state_counts = line.split(node_rep + '==')
+                    for j in state_counts:
+                        if j.split(' ')[0].isdigit():
+                            state = int(j.split(' ')[0]) + 1
+                            if state > highest_state:
+                                highest_state = state;
+            B.append(highest_state)
+        
+        # get the bases for every constant
+        
+        # constants are sporatically placed throughout the file - as they do not have regulatory
+        # rules they have no easy way to determine what their highest state count is aside from
+        # checking every entry in the file
+        for i, v in enumerate(constants):
+            node_rep = dict_vars_and_consts[v]
+            highest_state = 0
+            for line in tvec_rule:
+                if node_rep in line:
+                    state_counts = line.split(node_rep + '==')
+                    for j in state_counts:
+                        if j.split(' ')[0].isdigit():
+                            state = int(j.split(' ')[0]) + 1
+                            if state > highest_state:
+                                highest_state = state
+            B.append(highest_state)
+        
+        # convert B to a numpy array from a list
+        B = np.array(B, int)
+        
+        I = []
+        # get the regulators for every variable
+        for i in range(len(tvec)):
+            regulatee = int(tvec[i][utils.find_all_indices(tvec[i], '[')[0] + 1:utils.find_all_indices(tvec[i], ']')[0]])
+            idx_open = utils.find_all_indices(tvec_rule[i], '[')
+            idx_close = utils.find_all_indices(tvec_rule[i], ']')
+            dummy = np.sort(np.array(list(map(int, list(set([tvec_rule[i][(begin+1):end] for begin, end in zip(idx_open, idx_close)]))))))
+            if regulatee < len(I):
+                I[regulatee] = np.sort(list(set(np.concatenate((I[regulatee], dummy), dtype = int))))
+            else:
+                I.append(dummy)
+        
+        degree = list(map(len,I))
+        
+        # create the right side of the truth table for every variable
+        F = []
+        for i in range(node_count):
+            state_count = math.prod(B[I[i]])
+            f = np.zeros(state_count, int)
+            F.append(f)
+        for i, line in enumerate(tvec):
+            node_idx = int(tvec[i][utils.find_all_indices(tvec[i], '[')[0] + 1:utils.find_all_indices(tvec[i], ']')[0]])
+            state = int(line.split(str(node_idx) + ']==')[1].split(' ')[0])
+            x = np.zeros(I[node_idx][len(I[node_idx]) - 1] + 1, int)
+            for j, _ in enumerate(F[node_idx]):
+                vecj = utils.dec2mix(j, B[I[node_idx]])
+                for k, I_v in enumerate(I[node_idx]):
+                    x[I_v] = vecj[k]
+                if eval(tvec_rule[i]):
+                    F[node_idx][j] = state
+        
+        # add self-regulation to F and I for every constant
+        for i in range(len(constants)):
+            f = []
+            for b in range(B[i + len(variables)]):
+                f.append(b)
+            F.append(np.array(f))
+            I.append(np.array([len(variables) + i]))
+            degree.append(1)
+        
+        return cls(F, B, I, variables)
 
 #     @classmethod
 #     def from_DiGraph(cls, nx_DiGraph: "nx.DiGraph") -> "WiringDiagram":

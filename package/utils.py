@@ -1,11 +1,166 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# """
+# Utility functions used throughout BoolForge.
 
-#import random as _py_random
+# The :mod:`~boolforge.utils` module includes low-level operations for binary and
+# decimal conversions, truth table manipulations, and combinatorial helper
+# functions. These utilities are used internally by
+# :class:`~boolforge.BooleanFunction` and :class:`~boolforge.BooleanNetwork`
+# classes to enable efficient representation and analysis of Boolean functions
+# and networks.
+
+# Notes
+# -----
+# Most functions in this module are intended for internal use and are not part of
+# the stable public API.
+
+# Examples
+# --------
+# >>> import boolforge
+# >>> boolforge.bin2dec([1, 0, 1])
+# 5
+# >>> boolforge.dec2bin(5, 3)
+# array([1, 0, 1])
+# """
+
+import random as _py_random
 from collections.abc import Sequence
-#from numpy.random import Generator as _NPGen, RandomState as _NPRandomState, SeedSequence, default_rng
+import numpy as np
+from numpy.random import Generator as _NPGen, RandomState as _NPRandomState, SeedSequence, default_rng
 #from typing import Tuple
 
+_LOGIC_MAP = {
+    "AND": "&",
+    "and": "&",
+    "&&": "&",
+    "&": "&",
+    "OR": "|",
+    "or": "|",
+    "||": "|",
+    "|": "|",
+    "NOT": "~",
+    "not": "~",
+    "!": "~",
+    "~": "~",
+}
+
+_COMPARE_OPS = {"==", "!=", ">=", "<=", ">", "<"}
+
+_ARITH_OPS = {"+", "-", "*", "%"}
+
+# def _require_cana():
+#     try:
+#         import cana.boolean_node
+#         return cana.boolean_node
+#     except ModuleNotFoundError as e:
+#         raise ImportError(
+#             "This functionality requires CANA. "
+#             "Install it with `pip install cana`."
+#         ) from e
+        
+
+def _coerce_rng(
+    rng : int | _NPGen | _NPRandomState | _py_random.Random | None = None
+) -> _NPGen:
+    """
+    Coerce a variety of RNG-like inputs to a NumPy ``Generator``.
+
+    Parameters
+    ----------
+    rng : int | np.random.Generator | np.random.RandomState | random.Random | None, optional
+        Random number generator or seed specification.
+
+        - ``None``: return ``np.random.default_rng()``.
+        - ``int``: interpreted as a seed for ``default_rng``.
+        - ``np.random.Generator``: returned unchanged.
+        - ``np.random.RandomState``: converted via ``SeedSequence``.
+        - ``random.Random``: converted via ``SeedSequence``.
+
+    Returns
+    -------
+    np.random.Generator
+        A NumPy random number generator.
+
+    Raises
+    ------
+    TypeError
+        If ``rng`` is not one of the supported types.
+
+    Notes
+    -----
+    This function provides a unified RNG interface across BoolForge by
+    normalizing legacy and standard-library RNGs to the modern NumPy
+    ``Generator`` API.
+
+    Conversion from ``RandomState`` and ``random.Random`` is performed by
+    extracting entropy and initializing a ``SeedSequence``. This preserves
+    reproducibility while avoiding direct reliance on deprecated RNG APIs.
+    """
+    if rng is None:
+        return default_rng()
+    if isinstance(rng, _NPGen):
+        return rng
+    if isinstance(rng, (int, np.integer)):
+        return default_rng(int(rng))
+    if isinstance(rng, _NPRandomState):
+        # derive robust entropy from the legacy RNG
+        entropy = rng.randint(0, 2**32, size=4, dtype=np.uint32)
+        return default_rng(SeedSequence(entropy))
+    if isinstance(rng, _py_random.Random):
+        entropy = [_py_random.Random(rng.random()).getrandbits(32) for _ in range(4)]
+        # simpler: entropy = [rng.getrandbits(32) for _ in range(4)]
+        return default_rng(SeedSequence(entropy))
+    raise TypeError(f"Unsupported rng type: {type(rng)!r}")
+
+
+def _is_number(token: str) -> bool:
+    """Return True if token is a pure numeric literal."""
+    try:
+        float(token)
+        return True
+    except ValueError:
+        return False
+    
+
+# def is_float(element: object) -> bool:
+#     """
+#     Check whether an object can be coerced to a float.
+
+#     Parameters
+#     ----------
+#     element : object
+#         Object to test for float coercibility.
+
+#     Returns
+#     -------
+#     bool
+#         True if ``element`` can be converted to ``float`` without raising an
+#         exception, False otherwise.
+
+#     Notes
+#     -----
+#     This function tests coercibility, not type membership. For example,
+#     numeric strings and integers return True.
+
+#     Examples
+#     --------
+#     >>> is_float(3)
+#     True
+#     >>> is_float(3.14)
+#     True
+#     >>> is_float("2.7")
+#     True
+#     >>> is_float("abc")
+#     False
+#     >>> is_float(None)
+#     False
+#     """
+#     try:
+#         float(element)
+#         return True
+#     except (TypeError, ValueError):
+#         return False
 
 def mix2dec(vector : Sequence[int], radices : Sequence[int]) -> int:
     """
@@ -95,312 +250,72 @@ def bin2mix(binary_vector : Sequence[int], radices : Sequence[int]) -> list[int]
         decimal = (decimal << 1) | bit
     return dec2mix(decimal, radices)
 
-# """
-# Utility functions used throughout BoolForge.
 
-# The :mod:`~boolforge.utils` module includes low-level operations for binary and
-# decimal conversions, truth table manipulations, and combinatorial helper
-# functions. These utilities are used internally by
-# :class:`~boolforge.BooleanFunction` and :class:`~boolforge.BooleanNetwork`
-# classes to enable efficient representation and analysis of Boolean functions
-# and networks.
+left_side_of_truth_tables = {}
 
-# Notes
-# -----
-# Most functions in this module are intended for internal use and are not part of
-# the stable public API.
+def get_left_side_of_truth_table(R : Sequence[int]) -> np.ndarray:
+    """
+    Return the left-hand side of a Boolean truth table.
 
-# Examples
-# --------
-# >>> import boolforge
-# >>> boolforge.bin2dec([1, 0, 1])
-# 5
-# >>> boolforge.dec2bin(5, 3)
-# array([1, 0, 1])
-# """
+    The left-hand side is the binary representation of all input
+    combinations for ``N`` Boolean variables, ordered lexicographically.
 
-# _LOGIC_MAP = {
-#     "AND": "&",
-#     "and": "&",
-#     "&&": "&",
-#     "&": "&",
-#     "OR": "|",
-#     "or": "|",
-#     "||": "|",
-#     "|": "|",
-#     "NOT": "~",
-#     "not": "~",
-#     "!": "~",
-#     "~": "~",
-# }
+    Parameters
+    ----------
+    R : Sequence[int]
+
+    Returns
+    -------
+    np.ndarray
+        Array of shape ``(2**N, N)`` with entries in ``{0, 1}``. Columns are
+        ordered from most significant bit to least significant bit.
+    """
+    R = np.prod(R)
+    if R in left_side_of_truth_tables:
+        left_side_of_truth_table = left_side_of_truth_tables[R]
+    else:
+        left_side_of_truth_table = np.arange(R, dtype=np.uint64)[:, None]
+        left_side_of_truth_tables[R] = left_side_of_truth_table
+    return left_side_of_truth_table
 
 
-# _COMPARE_OPS = {"==", "!=", ">=", "<=", ">", "<"}
+def find_all_indices(arr: list, el: object) -> list[int]:
+    """
+    Find all indices of a given element in a sequence.
 
-# _ARITH_OPS = {"+", "-", "*", "%"}
+    Parameters
+    ----------
+    arr : list
+        Sequence to search.
+    el : object
+        Element to locate.
 
-# def _require_cana():
-#     try:
-#         import cana.boolean_node
-#         return cana.boolean_node
-#     except ModuleNotFoundError as e:
-#         raise ImportError(
-#             "This functionality requires CANA. "
-#             "Install it with `pip install cana`."
-#         ) from e
-        
+    Returns
+    -------
+    list of int
+        Indices ``i`` such that ``arr[i] == el``.
 
-# def _coerce_rng(
-#     rng : int | _NPGen | _NPRandomState | _py_random.Random | None = None
-# ) -> _NPGen:
-#     """
-#     Coerce a variety of RNG-like inputs to a NumPy ``Generator``.
+    Raises
+    ------
+    ValueError
+        If ``el`` does not occur in ``arr``.
 
-#     Parameters
-#     ----------
-#     rng : int | np.random.Generator | np.random.RandomState | random.Random | None, optional
-#         Random number generator or seed specification.
+    Examples
+    --------
+    >>> find_all_indices([1, 2, 1, 3], 1)
+    [0, 2]
+    >>> find_all_indices(['a', 'b', 'a'], 'a')
+    [0, 2]
+    """
+    res: list[int] = []
+    for i, a in enumerate(arr):
+        if a == el:
+            res.append(i)
 
-#         - ``None``: return ``np.random.default_rng()``.
-#         - ``int``: interpreted as a seed for ``default_rng``.
-#         - ``np.random.Generator``: returned unchanged.
-#         - ``np.random.RandomState``: converted via ``SeedSequence``.
-#         - ``random.Random``: converted via ``SeedSequence``.
+    if not res:
+        raise ValueError("Element not found in sequence")
 
-#     Returns
-#     -------
-#     np.random.Generator
-#         A NumPy random number generator.
-
-#     Raises
-#     ------
-#     TypeError
-#         If ``rng`` is not one of the supported types.
-
-#     Notes
-#     -----
-#     This function provides a unified RNG interface across BoolForge by
-#     normalizing legacy and standard-library RNGs to the modern NumPy
-#     ``Generator`` API.
-
-#     Conversion from ``RandomState`` and ``random.Random`` is performed by
-#     extracting entropy and initializing a ``SeedSequence``. This preserves
-#     reproducibility while avoiding direct reliance on deprecated RNG APIs.
-#     """
-#     if rng is None:
-#         return default_rng()
-#     if isinstance(rng, _NPGen):
-#         return rng
-#     if isinstance(rng, (int, np.integer)):
-#         return default_rng(int(rng))
-#     if isinstance(rng, _NPRandomState):
-#         # derive robust entropy from the legacy RNG
-#         entropy = rng.randint(0, 2**32, size=4, dtype=np.uint32)
-#         return default_rng(SeedSequence(entropy))
-#     if isinstance(rng, _py_random.Random):
-#         entropy = [_py_random.Random(rng.random()).getrandbits(32) for _ in range(4)]
-#         # simpler: entropy = [rng.getrandbits(32) for _ in range(4)]
-#         return default_rng(SeedSequence(entropy))
-#     raise TypeError(f"Unsupported rng type: {type(rng)!r}")
-
-
-# def _is_number(token: str) -> bool:
-#     """Return True if token is a pure numeric literal."""
-#     try:
-#         float(token)
-#         return True
-#     except ValueError:
-#         return False
-    
-
-# def is_float(element: object) -> bool:
-#     """
-#     Check whether an object can be coerced to a float.
-
-#     Parameters
-#     ----------
-#     element : object
-#         Object to test for float coercibility.
-
-#     Returns
-#     -------
-#     bool
-#         True if ``element`` can be converted to ``float`` without raising an
-#         exception, False otherwise.
-
-#     Notes
-#     -----
-#     This function tests coercibility, not type membership. For example,
-#     numeric strings and integers return True.
-
-#     Examples
-#     --------
-#     >>> is_float(3)
-#     True
-#     >>> is_float(3.14)
-#     True
-#     >>> is_float("2.7")
-#     True
-#     >>> is_float("abc")
-#     False
-#     >>> is_float(None)
-#     False
-#     """
-#     try:
-#         float(element)
-#         return True
-#     except (TypeError, ValueError):
-#         return False
-
-# def bin2dec(binary_vector: list[int]) -> int:
-#     """
-#     Convert a binary vector to an integer.
-
-#     Parameters
-#     ----------
-#     binary_vector : list of int
-#         Binary digits (0 or 1), ordered from most significant bit to least
-#         significant bit.
-
-#     Returns
-#     -------
-#     int
-#         Integer represented by the binary vector.
-
-#     Notes
-#     -----
-#     No validation is performed to ensure that entries of ``binary_vector`` are
-#     binary. Nonzero values are treated as 1 under bitwise conversion.
-
-#     Examples
-#     --------
-#     >>> bin2dec([1, 0, 1])
-#     5
-#     >>> bin2dec([0, 0, 1, 1])
-#     3
-#     """
-#     decimal = 0
-#     for bit in binary_vector:
-#         decimal = (decimal << 1) | bit
-#     return int(decimal)
-
-
-# def dec2bin(integer_value: int, num_bits: int) -> list[int]:
-#     """
-#     Convert a nonnegative integer to a binary vector.
-
-#     Parameters
-#     ----------
-#     integer_value : int
-#         Nonnegative integer to convert.
-#     num_bits : int
-#         Length of the binary representation.
-
-#     Returns
-#     -------
-#     list of int
-#         Binary digits (0 or 1), ordered from most significant bit to least
-#         significant bit.
-
-#     Notes
-#     -----
-#     - If ``integer_value`` requires more than ``num_bits`` bits, the most
-#       significant bits are truncated.
-#     - No validation is performed for negative inputs.
-
-#     Examples
-#     --------
-#     >>> dec2bin(5, 3)
-#     [1, 0, 1]
-#     >>> dec2bin(3, 5)
-#     [0, 0, 0, 1, 1]
-#     """
-#     binary_string = bin(integer_value)[2:].zfill(num_bits)
-#     return [int(bit) for bit in binary_string]
-
-
-# left_side_of_truth_tables = {}
-
-# def get_left_side_of_truth_table(N: int) -> np.ndarray:
-#     """
-#     Return the left-hand side of a Boolean truth table.
-
-#     The left-hand side is the binary representation of all ``2**N`` input
-#     combinations for ``N`` Boolean variables, ordered lexicographically from
-#     ``0`` to ``2**N - 1``.
-
-#     Parameters
-#     ----------
-#     N : int
-#         Number of Boolean variables.
-
-#     Returns
-#     -------
-#     np.ndarray
-#         Array of shape ``(2**N, N)`` with entries in ``{0, 1}``. Columns are
-#         ordered from most significant bit to least significant bit.
-
-#     Notes
-#     -----
-#     - The result is cached by ``N`` to avoid recomputation.
-#     - Row ``i`` corresponds to the binary expansion of integer ``i``.
-#     - The most significant bit appears in column 0.
-
-#     Examples
-#     --------
-#     >>> get_left_side_of_truth_table(2)
-#     array([[0, 0],
-#            [0, 1],
-#            [1, 0],
-#            [1, 1]], dtype=uint8)
-#     """
-#     if N in left_side_of_truth_tables:
-#         left_side_of_truth_table = left_side_of_truth_tables[N]
-#     else:
-#         vals = np.arange(2**N, dtype=np.uint64)[:, None]
-#         masks = (1 << np.arange(N-1, -1, -1, dtype=np.uint64))[None]
-#         left_side_of_truth_table = ((vals & masks) != 0).astype(np.uint8)
-#         left_side_of_truth_tables[N] = left_side_of_truth_table
-#     return left_side_of_truth_table
-
-
-# def find_all_indices(arr: list, el: object) -> list[int]:
-#     """
-#     Find all indices of a given element in a sequence.
-
-#     Parameters
-#     ----------
-#     arr : list
-#         Sequence to search.
-#     el : object
-#         Element to locate.
-
-#     Returns
-#     -------
-#     list of int
-#         Indices ``i`` such that ``arr[i] == el``.
-
-#     Raises
-#     ------
-#     ValueError
-#         If ``el`` does not occur in ``arr``.
-
-#     Examples
-#     --------
-#     >>> find_all_indices([1, 2, 1, 3], 1)
-#     [0, 2]
-#     >>> find_all_indices(['a', 'b', 'a'], 'a')
-#     [0, 2]
-#     """
-#     res: list[int] = []
-#     for i, a in enumerate(arr):
-#         if a == el:
-#             res.append(i)
-
-#     if not res:
-#         raise ValueError("Element not found in sequence")
-
-#     return res
+    return res
 
 
 # def check_if_empty(my_list: list | np.ndarray) -> bool:
@@ -582,163 +497,56 @@ def bin2mix(binary_vector : Sequence[int], radices : Sequence[int]) -> list[int]
 #     return '0'
 
 
-
-# def f_from_expression(
-#     expr: str,
-#     max_degree: int = 16,
-# ) -> Tuple[np.ndarray, np.ndarray]:
-#     """
-#     Construct a Boolean function from a string expression.
+def f_from_expression(expr, R, max_degree = 16):
+    expr = expr.replace('(', ' ( ').replace(')', ' ) ')
+    raw_tokens = expr.split()
+    tokens = []
+    variables = []
+    seen = set()
     
-#     The expression is evaluated symbolically over all Boolean input
-#     combinations to produce the truth table of the corresponding Boolean
-#     function. Variables are detected automatically based on their first
-#     occurrence in the expression.
-    
-#     Parameters
-#     ----------
-#     expr : str
-#         Boolean expression to evaluate. The expression may contain logical
-#         operators (``AND``, ``OR``, ``NOT`` or their lowercase equivalents),
-#         arithmetic operators, and comparisons.
-#     max_degree : int, optional
-#         Maximum number of variables allowed. If the number of detected
-#         variables exceeds ``max_degree``, an empty truth table is returned.
-    
-#     Returns
-#     -------
-#     f : np.ndarray
-#         Boolean function values as an array of shape ``(2**n,)`` with entries
-#         in ``{0, 1}``, where ``n`` is the number of detected variables.
-#     variables : np.ndarray
-#         Variable names in the order they were first encountered in the
-#         expression.
-    
-#     Notes
-#     -----
-#     - Variables are ordered by first occurrence in ``expr``.
-#     - Truth-table rows follow the standard lexicographic ordering with the
-#       most significant bit first.
-#     - The expression is evaluated using ``eval`` with restricted builtins.
-#     - No syntactic or semantic validation of ``expr`` is performed beyond
-#       basic parsing.
-    
-#     Examples
-#     --------
-#     >>> f_from_expression('A AND NOT B')
-#     (array([0, 0, 1, 0], dtype=uint8), array(['A', 'B'], dtype='<U1'))
-    
-#     >>> f_from_expression('x1 + x2 + x3 > 1')
-#     (array([0, 0, 0, 1, 0, 1, 1, 1], dtype=uint8),
-#      array(['x1', 'x2', 'x3'], dtype='<U2'))
-    
-#     >>> f_from_expression('(x1 + x2 + x3) % 2 == 0')
-#     (array([1, 0, 0, 1, 0, 1, 1, 0], dtype=uint8),
-#      array(['x1', 'x2', 'x3'], dtype='<U2'))
-#     """
-    
-#     # --------------------------------------------------
-#     # 1. Normalize parentheses spacing
-#     # --------------------------------------------------
-
-#     expr = expr.replace("(", " ( ").replace(")", " ) ")
-
-#     raw_tokens = expr.split()
-
-#     tokens = []
-#     variables = []
-#     seen = set()
-
-#     # --------------------------------------------------
-#     # 2. Token classification
-#     # --------------------------------------------------
-
-#     for token in raw_tokens:
-
-#         if token in {"(", ")"}:
-#             tokens.append(token)
-#             continue
-
-#         if token in _LOGIC_MAP:
-#             tokens.append(_LOGIC_MAP[token])
-#             continue
-
-#         if token in _COMPARE_OPS:
-#             tokens.append(token)
-#             continue
-        
-#         if token in _ARITH_OPS:
-#             tokens.append(token)
-#             continue
-
-#         if _is_number(token):
-#             tokens.append(token)
-#             continue
-
-#         # Otherwise: biological identifier
-#         if token not in seen:
-#             seen.add(token)
-#             variables.append(token)
-
-#         tokens.append(token)
-
-#     n = len(variables)
-
-#     if n > max_degree:
-#         return np.array([], dtype=np.uint8), np.array(variables)
-
-#     # --------------------------------------------------
-#     # 3. Map biological names → safe Python names
-#     # --------------------------------------------------
-
-#     safe_map = {var: f"v{i}" for i, var in enumerate(variables)}
-
-#     safe_tokens = [
-#         safe_map[token] if token in safe_map else token
-#         for token in tokens
-#     ]
-
-#     expr_mod = " ".join(safe_tokens)
-
-#     # --------------------------------------------------
-#     # 4. Build evaluation environment
-#     # --------------------------------------------------
-
-#     truth_table = get_left_side_of_truth_table(n)
-
-#     local_dict = {
-#         safe_map[var]: truth_table[:, i].astype(np.int64)
-#         for i, var in enumerate(variables)
-#     }
-
-#     # --------------------------------------------------
-#     # 5. Evaluate expression
-#     # --------------------------------------------------
-
-#     try:
-#         result = eval(expr_mod, {"__builtins__": None}, local_dict)
-#     except Exception as e:
-#         raise ValueError(
-#             f"Error evaluating expression:\n{expr}\nParsed as:\n{expr_mod}\nError: {e}"
-#         )
-
-#     # --------------------------------------------------
-#     # 6. Enforce Boolean semantics
-#     # --------------------------------------------------
-
-#     result = np.asarray(result)
-
-#     if n == 0:
-#         result = np.array([int(result)], dtype=np.int64)
-#     else:
-#         result = result.astype(np.int64)
-
-#     # Fix NOT and enforce {0,1}
-#     result = result & 1
-
-#     return result.astype(np.uint8), np.array(variables)
-
-
+    for token in raw_tokens:
+        if token in {"(", ")"}:
+            tokens.append(token)
+            continue
+        if token in _LOGIC_MAP:
+            tokens.append(_LOGIC_MAP[token])
+            continue
+        if token in _COMPARE_OPS:
+            tokens.append(token)
+            continue
+        if token in _ARITH_OPS:
+            tokens.append(token)
+            continue
+        if _is_number(token):
+            tokens.append(token)
+            continue
+        if token not in seen:
+            seen.add(token)
+            variables.append(token)
+        token.appnd(token)
+    n = len(variables)
+    if n > max_degree:
+        return np.array([], np.uint8), np.array(variables)
+    safe_map = { var: f"v{i}" for i, var in enumerate(variables) }
+    safe_tokens = [
+        safe_map[token] if token in safe_map else token for token in tokens
+    ]
+    expr_mod = " ".join(safe_tokens)
+    truth_table = get_left_side_of_truth_table(n, R)
+    local_dict = {
+        safe_map[var]: truth_table[:, i].astype(np.int64) for i, var in enumerate(variables)
+    }
+    try:
+        result = eval(expr_mod, {"__builtins__":None},local_dict)
+    except Exception as e:
+        raise ValueError(f"Error evaluating expression: \n{expr}\nParsed as:\n{expr_mod}\nError: {e}")
+    result = np.asarray(result)
+    if n == 0:
+        result = np.array([int(result)], np.int64)
+    else:
+        result = result.astype(np.int64)
+    result %= np.prod(R)
+    return result.astype(np.uint8), np.array(variables)
 
 
 # def flatten(l: Sequence[Sequence[object]]) -> list[object]:
